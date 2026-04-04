@@ -64,26 +64,7 @@ if not is_production:
 app.include_router(api_router, prefix="/api")
 
 
-# Раздача статических файлов Next.js (production mode)
-if STATIC_DIR.exists():
-    print(f"📦 Serving static files from {STATIC_DIR}")
-    
-    # Монтируем статические файлы
-    app.mount("/_next", StaticFiles(directory=str(STATIC_DIR / "_next")), name="_next")
-    app.mount("/assets", StaticFiles(directory=str(STATIC_DIR / "assets"), check_dir=False), name="assets")
-    
-    @app.get("/{full_path:path}")
-    async def serve_frontend(full_path: str):
-        """
-        Отдаём index.html для всех не-API роутов (SPA routing)
-        """
-        index_file = STATIC_DIR / "index.html"
-        if index_file.exists():
-            return FileResponse(index_file)
-        return {"error": "Frontend not built. Run 'npm run build' first."}
-
-
-# Health check
+# Health check (должен быть ДО catch-all роута!)
 @app.get("/health", tags=["Health"])
 async def health_check():
     """Проверка здоровья API"""
@@ -101,6 +82,35 @@ async def root():
         "docs": "/docs",
         "health": "/health",
     }
+
+
+# Раздача статических файлов Next.js (production mode)
+if STATIC_DIR.exists():
+    print(f"📦 Serving static files from {STATIC_DIR}")
+
+    # Проверяем что директории существуют перед монтированием
+    next_dir = STATIC_DIR / "_next"
+    assets_dir = STATIC_DIR / "assets"
+
+    if next_dir.exists():
+        app.mount("/_next", StaticFiles(directory=str(next_dir)), name="_next")
+        print("✅ Mounted /_next")
+    
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir), check_dir=False), name="assets")
+        print("✅ Mounted /assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        """
+        Отдаём index.html для всех не-API роутов (SPA routing)
+        """
+        index_file = STATIC_DIR / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
+        return {"error": "Frontend not built. Run 'npm run build' first."}
+else:
+    print("⚠️  Static files not found. Frontend will not be served.")
 
 
 if __name__ == "__main__":
