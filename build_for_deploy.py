@@ -1,6 +1,9 @@
 """
-Скрипт для сборки фронтенда и подготовки к деплою
-Запускать перед деплоем на Railway
+Скрипт для локальной сборки фронтенда перед деплоем.
+
+NOTE: В production Railway использует Dockerfile, который выполняет
+все шаги сборки автоматически. Этот скрипт предназначен только для
+локальной проверки перед коммитом.
 """
 
 import subprocess
@@ -13,12 +16,12 @@ def run_command(command: list[str], cwd: str = None) -> bool:
     """Запускает команду и выводит вывод"""
     print(f"🔄 Running: {' '.join(command)}")
     try:
-        result = subprocess.run(
+        subprocess.run(
             command,
             cwd=cwd,
             check=True,
             capture_output=False,
-            text=True
+            text=True,
         )
         return True
     except subprocess.CalledProcessError as e:
@@ -27,48 +30,39 @@ def run_command(command: list[str], cwd: str = None) -> bool:
 
 
 def main():
-    print("🚀 Building Whale Screener for deployment...")
+    print("🚀 Building Whale Screener locally...")
     print("=" * 60)
+    print("ℹ️  On Railway, the Dockerfile handles all build steps.")
 
-    # Определяем корневую директорию
     root_dir = Path(__file__).parent
     os.chdir(root_dir)
 
-    # Шаг 1: Установка Node.js зависимостей
+    # Step 1: Node.js dependencies
     print("\n📦 Step 1: Installing Node.js dependencies...")
-    if not run_command(["npm", "install"]):
-        print("❌ Failed to install dependencies")
+    if not run_command(["npm", "ci"]):
+        print("❌ Failed to install Node.js dependencies")
         sys.exit(1)
 
-    # Шаг 2: Сборка Next.js
+    # Step 2: Build Next.js static export
     print("\n🔨 Step 2: Building Next.js frontend...")
     if not run_command(["npm", "run", "build"]):
         print("❌ Failed to build frontend")
         sys.exit(1)
 
-    # Шаг 3: Проверка что out директория существует
+    # Step 3: Verify output directory
     out_dir = root_dir / "out"
     if not out_dir.exists():
         print("❌ Build failed: 'out' directory not found")
         sys.exit(1)
 
+    size_mb = sum(f.stat().st_size for f in out_dir.rglob("*") if f.is_file()) / 1024 / 1024
     print(f"\n✅ Frontend built successfully!")
     print(f"📁 Static files in: {out_dir}")
-    print(f"📊 Size: {sum(f.stat().st_size for f in out_dir.rglob('*') if f.is_file()) / 1024 / 1024:.2f} MB")
-
-    # Шаг 4: Установка Python зависимостей
-    print("\n📦 Step 3: Installing Python dependencies...")
-    if not run_command(["pip", "install", "-r", "requirements.txt", "-q"]):
-        print("⚠️  Failed to install Python dependencies (continue anyway)")
+    print(f"📊 Size: {size_mb:.2f} MB")
 
     print("\n" + "=" * 60)
-    print("✅ Build complete! Ready to deploy on Railway")
-    print("\n📝 Next steps:")
-    print("   1. Commit changes: git add . && git commit -m 'Build for deployment'")
-    print("   2. Push to GitHub")
-    print("   3. Connect to Railway")
-    print("   4. Set environment variables")
-    print("   5. Deploy!")
+    print("✅ Local build complete!")
+    print("\n📝 To deploy: git add . && git commit && git push")
 
 
 if __name__ == "__main__":
