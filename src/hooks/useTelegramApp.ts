@@ -23,6 +23,7 @@ interface TelegramWebApp {
   initData: string;
   expand: () => void;
   close: () => void;
+  sendData: (data: string) => void;
   MainButton: {
     show: () => void;
     hide: () => void;
