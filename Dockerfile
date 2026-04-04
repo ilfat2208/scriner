@@ -1,8 +1,5 @@
 # ============================================================
 # Whale Screener — hybrid Node.js (Next.js) + Python (FastAPI)
-#
-# Strategy: start from python:3.11-bullseye (matches runtime.txt)
-# and install Node.js 18 via the official NodeSource setup script.
 # ============================================================
 FROM python:3.11-bullseye
 
@@ -31,11 +28,8 @@ COPY . .
 # ── Build Next.js static export → ./out ──────────────────────
 RUN npm run build
 
-# ── Entrypoint script ────────────────────────────────────────
-COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-
 # ── Runtime ──────────────────────────────────────────────────
 EXPOSE 8000
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+# Simple shell CMD that expands $PORT
+CMD ["sh", "-c", "python -m uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000} --log-level info"]
