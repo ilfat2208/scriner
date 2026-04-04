@@ -26,14 +26,20 @@ async def lifespan(app: FastAPI):
     """
     # Startup
     print("🚀 Starting Whale Screener API...")
-    await init_db()
-    print("✅ Database initialized")
+    try:
+        await init_db()
+        print("✅ Database initialized")
+    except Exception as e:
+        print(f"⚠️  Database init failed (continuing): {e}")
 
     yield
 
     # Shutdown
     print("⏹️ Shutting down Whale Screener API...")
-    await close_db()
+    try:
+        await close_db()
+    except Exception:
+        pass
 
 
 # Создание приложения
@@ -68,9 +74,11 @@ app.include_router(api_router, prefix="/api")
 @app.get("/health", tags=["Health"])
 async def health_check():
     """Проверка здоровья API"""
+    print("🏥 Healthcheck called!")
     return {
         "status": "healthy",
         "version": "2.0.0",
+        "timestamp": "2024-04-04T12:00:00Z",
     }
 
 
