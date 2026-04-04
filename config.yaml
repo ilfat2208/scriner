@@ -1,0 +1,64 @@
+# ============================================
+# Crypto Whale Screener - Configuration
+# ============================================
+
+# Пороги обнаружения китов
+whale_detection:
+  min_volume_usd: 50000          # Снижено с $300,000 до $50,000 для тестов
+  momentum_window_seconds: 60    # Окно анализа импульса
+  momentum_threshold_percent: 100 # Снижено с 300% до 100% для тестов
+
+# ============================================
+# PUMP SCREENER - Настройки двух комбинаций
+# ============================================
+# Первая комбинация: для поиска небольших пампов в ЛОНГ
+# Вторая комбинация: для поиска ШОРТ-СКВИЗОВ
+
+pump_detector:
+  # 🟢 ЛОНГ комбинация (для небольших пампов)
+  long:
+    enabled: true                # Включить/выключить
+    min_percent: 1.0             # Минимальный % пампа (0.1 - 100)
+    window_seconds: 60           # Время в секундах (60 = 1 минута, 1800 = 30 минут)
+    cooldown_seconds: 30         # Кулдаун между алертами
+  
+  # 🔴 ШОРТ комбинация (для шорт-сквизов)
+  short:
+    enabled: true                # Включить/выключить
+    min_percent: 10.0           # Минимальный % пампа (0.1 - 100)
+    window_seconds: 300          # Время в секундах (300 = 5 минут)
+    cooldown_seconds: 60         # Кулдаун между алертами
+
+# Отслеживаемые пары
+# Варианты:
+#   'ALL' - все фьючерсные пары Binance (~200 пар)
+#   Список пар - только указанные пары
+tracked_pairs: 'ALL'
+# tracked_pairs:
+#   - BTC/USDT
+#   - ETH/USDT
+
+# Биржи
+exchanges:
+  cex:
+    - binance
+    - bybit
+  dex:
+    - uniswap_v3
+
+# Уведомления
+notifications:
+  send_to_telegram: true
+  send_to_log: true
+  cooldown_seconds: 5  # Задержка между алертами для одной пары
+
+# Фильтры
+filters:
+  exclude_wash_trading: true
+  min_price_impact_percent: 0.1
+  exclude_stablecoins: true
+  stablecoins:
+    - USDT
+    - USDC
+    - BUSD
+    - DAI

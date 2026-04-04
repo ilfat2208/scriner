@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0a0e1a;
+  --surface: #111827;
+  --surface-2: #1f2937;
+  --primary: #3b82f6;
+  --success: #10b981;
+  --danger: #ef4444;
+  --whale: #8b5cf6;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  background-color: var(--background);
+  color: #ffffff;
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface-2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
+
+/* Prevent overflow */
+* {
+  max-width: 100%;
+}
+
+/* Utilities */
+.glass-effect {
+  background: rgba(17, 24, 39, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.neon-border {
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+.neon-border-success {
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+.neon-border-danger {
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+/* Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Mantine overrides */
+.mantine-AppShell-header {
+  display: none !important;
+}

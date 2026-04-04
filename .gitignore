@@ -1,0 +1,124 @@
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ============================================
+# Node.js / Next.js
+# ============================================
+node_modules/
+.next/
+out/
+.next/cache/
+*.tsbuildinfo
+
+# Next.js
+.next/
+out/
+build/
+
+# ============================================
+# Environment Variables
+# ============================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+!.env.example.frontend
+
+# ============================================
+# Database
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+whale_screener.db
+
+# ============================================
+# Logs
+# ============================================
+*.log
+logs/
+*.log.*
+
+# ============================================
+# OS
+# ============================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================================
+# Testing
+# ============================================
+coverage/
+.nyc_output/
+htmlcov/
+.jest/
+
+# ============================================
+# Railway
+# ============================================
+railway.env
+.railway/
+
+# ============================================
+# Temporary Files
+# ============================================
+tmp/
+temp/
+*.tmp
+*.bak
+
+# ============================================
+# Machine Learning Models
+# ============================================
+models/*.pkl
+models/*.joblib
+models/*.h5
+ml_models/
+
+# ============================================
+# Data Files
+# ============================================
+data/
+*.csv
+*.jsonl
+!package.json
+!package-lock.json
+!tsconfig.json
+!railway.json
+
+# ============================================
+# Debug
+# ============================================
+debug_*.py
+test_*.py
+*.dump
+*.pickle

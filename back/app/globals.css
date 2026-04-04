@@ -1,0 +1,89 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  background-color: #0e1117;
+  color: white;
+}
+
+.app-shell-header {
+  background-color: #1a1b1e !important;
+  border-bottom: 1px solid #2d2d2d;
+}
+
+.chart-card {
+  background-color: #1a1b1e;
+  border-radius: 8px;
+  border: 1px solid #2d2d2d;
+  overflow: hidden;
+}
+
+.chart-card:hover {
+  border-color: #00ff88;
+  transition: border-color 0.2s;
+}
+
+.badge-green {
+  color: #00ff88;
+  border-color: rgba(105, 219, 124, 1);
+}
+
+.badge-red {
+  color: #ff416c;
+  border-color: rgba(255, 135, 135, 1);
+}
+
+.badge-yellow {
+  color: #fffe00;
+  border-color: rgba(255, 254, 0, 1);
+}
+
+.badge-gray {
+  color: #a5a5a5;
+  border-color: #a5a5a5;
+}
+
+.price-up {
+  color: #00ff88 !important;
+}
+
+.price-down {
+  color: #ff416c !important;
+}
+
+/* Скрываем стандартные элементы Mantine AppShell */
+.mantine-AppShell-header {
+  display: none;
+}
+
+/* Watermark */
+.watermark {
+  position: absolute;
+  font-size: 32px;
+  color: rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1b1e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2d2d2d;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3d3d3d;
+}
