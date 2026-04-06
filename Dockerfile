@@ -28,8 +28,11 @@ COPY . .
 # ── Build Next.js static export → ./out ──────────────────────
 RUN npm run build
 
+# ── Create data directory for bot ────────────────────────────
+RUN mkdir -p /app/data
+
 # ── Runtime ──────────────────────────────────────────────────
 EXPOSE 8000
 
-# Use Python script to start the server (handles PORT properly)
+# Use Python script to start both FastAPI and Telegram bot
 CMD ["python", "start.py"]

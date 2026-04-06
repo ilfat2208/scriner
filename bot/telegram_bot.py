@@ -14,7 +14,7 @@ from enum import Enum
 
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command, StateFilter
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
@@ -27,11 +27,20 @@ from models.alert import Alert, AlertType
 SUBSCRIBERS_FILE = Path("data/subscribers.json")
 USER_SETTINGS_FILE = Path("data/user_settings.json")
 
+# URL Mini App (берём из env или используем default)
+import os
+MINI_APP_URL = os.environ.get("MINI_APP_URL", "https://scriner-production.up.railway.app")
+
 
 def get_main_reply_keyboard() -> ReplyKeyboardMarkup:
-    """Создание главного меню с Reply кнопками (постоянное меню)"""
+    """Создание главного меню с Reply кнопками + Mini App кнопка"""
     keyboard = ReplyKeyboardMarkup(
         keyboard=[
+            # Кнопка Mini App - открывается прямо в Telegram
+            [KeyboardButton(
+                text="🐋 Открыть Whale Screener",
+                web_app=WebAppInfo(url=MINI_APP_URL)
+            )],
             [KeyboardButton(text="📊 Статус"), KeyboardButton(text="⚙️ Настройки")],
             [KeyboardButton(text="🪙 Биржи"), KeyboardButton(text="🔐 Доступ")],
             [KeyboardButton(text="📈 PUMP конфиг"), KeyboardButton(text="📉 Настройка LONG")],
