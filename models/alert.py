@@ -1,5 +1,6 @@
 """
 Модель алерта
+Версия: 2.0.1 (fixed syntax error)
 """
 
 from dataclasses import dataclass
