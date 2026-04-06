@@ -4,6 +4,7 @@ import './globals.css';
 import { ColorSchemeScript, MantineProvider, createTheme } from '@mantine/core';
 import { ReactNode } from 'react';
 import Script from 'next/script';
+import { ClientLayout } from './ClientLayout';
 
 const theme = createTheme({
   primaryColor: 'green',
@@ -45,7 +46,7 @@ export default function RootLayout({
       </head>
       <body style={{ margin: 0, padding: 0 }}>
         <MantineProvider theme={theme} defaultColorScheme="dark">
-          {children}
+          <ClientLayout>{children}</ClientLayout>
         </MantineProvider>
       </body>
     </html>
