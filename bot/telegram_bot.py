@@ -784,7 +784,7 @@ class WhaleAlertBot:
     async def _handle_help(self, message: types.Message):
         user_id = message.from_user.id
         is_admin = user_id == self.admin_id
-        
+
         text = (
             "📚 <b>Помощь</b>\n\n"
             "Используйте кнопки меню внизу экрана:\n\n"
@@ -794,22 +794,22 @@ class WhaleAlertBot:
             "• 🔐 Доступ - информация о подписке\n"
             "• ℹ️ Помощь - эта справка\n\n"
             "<b>Команды настройки:</b>\n"
-            "• /set_interval <мин> - интервал мониторинга (1, 5, 15, 30)\n"
-            "• /set_threshold <%> - порог изменения цены (0.1-100)\n"
+            "• /set_interval [минуты] - интервал мониторинга (1, 5, 15, 30)\n"
+            "• /set_threshold [процент] - порог изменения цены (0.1-100)\n"
             "• /set_rsi on/off - вкл/выкл RSI фильтр\n"
             "• /set_24h on/off - вкл/выкл 24ч фильтр\n"
             "• /set_signals pump/dump/both - типы сигналов\n"
-            "• /set_volume <сумма> - мин. объём в USD\n\n"
+            "• /set_volume [сумма] - мин. объём в USD\n\n"
         )
-        
+
         if is_admin:
             text += (
                 "<b>Команды администратора:</b>\n"
-                "• /set_long <%> <мин> - настроить LONG\n"
-                "• /set_short <%> <мин> - настроить SHORT\n"
-                "• /set_threshold <сумма> - порог кита в USD"
+                "• /set_long [процент] [минуты] - настроить LONG\n"
+                "• /set_short [процент] [минуты] - настроить SHORT\n"
+                "• /set_threshold [сумма] - порог кита в USD"
             )
-        
+
         await message.answer(text, reply_markup=get_main_reply_keyboard())
     
     async def _cmd_set_interval(self, message: types.Message):
