@@ -192,10 +192,14 @@ class WhaleScreener:
         logger.info("📡 Получение списка всех фьючерсных пар Binance...")
         
         try:
-            async with aiohttp.ClientSession() as session:
+            import aiohttp
+            timeout = aiohttp.ClientTimeout(total=10)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
                 url = "https://fapi.binance.com/fapi/v1/exchangeInfo"
-                
+
                 async with session.get(url) as response:
+                    if response.status != 200:
+                        raise Exception(f"Binance API returned {response.status}")
                     data = await response.json()
                     
                     # Фильтрация только USDT пар с статусом TRADING
@@ -218,8 +222,13 @@ class WhaleScreener:
                     
         except Exception as e:
             logger.error(f"❌ Ошибка получения пар: {e}")
+            logger.warning("⚠️ Используем дефолтный список пар")
             # Возврат дефолтного списка при ошибке
-            return ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT', 'XRP/USDT']
+            default_pairs = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT', 'XRP/USDT', 
+                           'DOGE/USDT', 'ADA/USDT', 'MATIC/USDT', 'DOT/USDT', 'AVAX/USDT',
+                           'LINK/USDT', 'UNI/USDT', 'ATOM/USDT', 'NEAR/USDT', 'APT/USDT',
+                           'ARB/USDT', 'OP/USDT', 'INJ/USDT', 'SUI/USDT', 'LTC/USDT']
+            return default_pairs
     
     async def initialize(self):
         """Инициализация всех компонентов"""
