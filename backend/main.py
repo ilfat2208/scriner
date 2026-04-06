@@ -98,35 +98,17 @@ if STATIC_DIR.exists():
         app.mount("/assets", StaticFiles(directory=str(assets_dir), check_dir=False), name="assets")
         print("✅ Mounted /assets")
 
-    def find_static_file(path: str):
-        """
-        Ищем статический файл для SPA роутинга Next.js
-        Next.js export создаёт:
-          / → index.html
-          /signals → signals/index.html
-          /analytics → analytics/index.html
-        """
-        # Пробуем {path}/index.html (для /signals → signals/index.html)
-        dir_index = STATIC_DIR / path / "index.html"
-        if dir_index.exists():
-            return FileResponse(dir_index)
-        
-        # Пробуем {path}.html
-        html_file = STATIC_DIR / f"{path}.html"
-        if html_file.exists():
-            return FileResponse(html_file)
-        
-        # Fallback на корневой index.html
-        root_index = STATIC_DIR / "index.html"
-        if root_index.exists():
-            return FileResponse(root_index)
-        
-        return {"error": "Page not found"}
+    def serve_index():
+        """Отдаём index.html"""
+        index_file = STATIC_DIR / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
+        return {"error": "Frontend not built"}
 
     @app.get("/", tags=["Root"])
     async def root():
         """Главная страница - фронтенд"""
-        return await find_static_file("")
+        return serve_index()
 
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
@@ -137,7 +119,18 @@ if STATIC_DIR.exists():
         if full_path.startswith("api/") or full_path.startswith("docs"):
             return {"error": "Not found"}
         
-        return await find_static_file(full_path)
+        # Пробуем {path}/index.html (для /signals → signals/index.html)
+        dir_index = STATIC_DIR / full_path / "index.html"
+        if dir_index.exists():
+            return FileResponse(dir_index)
+        
+        # Пробуем {path}.html
+        html_file = STATIC_DIR / f"{full_path}.html"
+        if html_file.exists():
+            return FileResponse(html_file)
+        
+        # Fallback на корневой index.html
+        return serve_index()
 else:
     print("⚠️  Static files not found. Frontend will not be served.")
 
