@@ -73,8 +73,9 @@ async def start_telegram_bot():
         
         print("✅ Telegram Bot is running!")
         
-        # Запускаем polling
-        await bot.dispatcher.start_polling(bot.bot)
+        # Запускаем polling БЕЗ signal handlers (для thread)
+        await bot.bot.delete_webhook(drop_pending_updates=True)
+        await bot.dispatcher.start_polling(bot.bot, skip_updates=True)
         
     except Exception as e:
         print(f"❌ Telegram Bot failed to start: {e}")
@@ -91,6 +92,16 @@ def start_bot_thread():
     
     try:
         loop.run_until_complete(start_telegram_bot())
+    except RuntimeError as e:
+        if "set_wakeup_fd" in str(e):
+            print("⚠️  Bot polling warning (signal handlers skipped — this is OK in threads)")
+            # Игнорируем ошибку signal handler, продолжаем
+            try:
+                loop.run_until_complete(start_telegram_bot())
+            except Exception as e2:
+                print(f"❌ Bot thread error: {e2}")
+        else:
+            print(f"❌ Bot thread error: {e}")
     except Exception as e:
         print(f"❌ Bot thread error: {e}")
         import traceback
