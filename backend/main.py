@@ -82,16 +82,6 @@ async def health_check():
     }
 
 
-@app.get("/", tags=["Root"])
-async def root():
-    """Корневая страница API"""
-    return {
-        "message": "🐋 Whale Screener API",
-        "docs": "/docs",
-        "health": "/health",
-    }
-
-
 # Раздача статических файлов Next.js (production mode)
 if STATIC_DIR.exists():
     print(f"📦 Serving static files from {STATIC_DIR}")
@@ -103,22 +93,61 @@ if STATIC_DIR.exists():
     if next_dir.exists():
         app.mount("/_next", StaticFiles(directory=str(next_dir)), name="_next")
         print("✅ Mounted /_next")
-    
+
     if assets_dir.exists():
         app.mount("/assets", StaticFiles(directory=str(assets_dir), check_dir=False), name="assets")
         print("✅ Mounted /assets")
 
+    def find_static_file(path: str):
+        """
+        Ищем статический файл для SPA роутинга Next.js
+        Next.js export создаёт:
+          / → index.html
+          /signals → signals/index.html
+          /analytics → analytics/index.html
+        """
+        # Пробуем {path}/index.html (для /signals → signals/index.html)
+        dir_index = STATIC_DIR / path / "index.html"
+        if dir_index.exists():
+            return FileResponse(dir_index)
+        
+        # Пробуем {path}.html
+        html_file = STATIC_DIR / f"{path}.html"
+        if html_file.exists():
+            return FileResponse(html_file)
+        
+        # Fallback на корневой index.html
+        root_index = STATIC_DIR / "index.html"
+        if root_index.exists():
+            return FileResponse(root_index)
+        
+        return {"error": "Page not found"}
+
+    @app.get("/", tags=["Root"])
+    async def root():
+        """Главная страница - фронтенд"""
+        return await find_static_file("")
+
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
         """
-        Отдаём index.html для всех не-API роутов (SPA routing)
+        Отдаём соответствующий HTML для SPA роутинга
         """
-        index_file = STATIC_DIR / "index.html"
-        if index_file.exists():
-            return FileResponse(index_file)
-        return {"error": "Frontend not built. Run 'npm run build' first."}
+        # Не перехватываем /api и /docs
+        if full_path.startswith("api/") or full_path.startswith("docs"):
+            return {"error": "Not found"}
+        
+        return await find_static_file(full_path)
 else:
     print("⚠️  Static files not found. Frontend will not be served.")
+
+    @app.get("/", tags=["Root"])
+    async def root():
+        return {
+            "message": "🐋 Whale Screener API",
+            "docs": "/docs",
+            "health": "/health",
+        }
 
 
 if __name__ == "__main__":
