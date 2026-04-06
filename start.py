@@ -2,15 +2,14 @@
 """
 Главный startup скрипт для Railway
 Запускает:
-  1. FastAPI сервер (веб-приложение + API)
-  2. Telegram бота (aiogram)
+  1. Telegram бота (главный поток — нужен для signal handlers)
+  2. FastAPI сервер (отдельный поток)
 """
 
 import os
 import sys
 import asyncio
 import threading
-import signal
 from pathlib import Path
 
 print("=" * 60)
@@ -51,9 +50,9 @@ def start_fastapi():
         access_log=False,
     )
 
-# ── Запуск Telegram бота ─────────────────────────────────────
+# ── Запуск Telegram бота в главном потоке ────────────────────
 async def start_telegram_bot():
-    """Запускаем aiogram бота"""
+    """Запускаем aiogram бота в главном потоке"""
     if not START_BOT:
         print("⏭️  Skipping Telegram bot (no token)")
         return
@@ -73,37 +72,11 @@ async def start_telegram_bot():
         
         print("✅ Telegram Bot is running!")
         
-        # Запускаем polling БЕЗ signal handlers (для thread)
-        await bot.bot.delete_webhook(drop_pending_updates=True)
-        await bot.dispatcher.start_polling(bot.bot, skip_updates=True)
+        # Запускаем polling в главном потоке (signal handlers работают)
+        await bot.dispatcher.start_polling(bot.bot)
         
     except Exception as e:
-        print(f"❌ Telegram Bot failed to start: {e}")
-        import traceback
-        traceback.print_exc()
-
-def start_bot_thread():
-    """Запускаем бота в отдельном потоке с asyncio loop"""
-    if not START_BOT:
-        return
-    
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    
-    try:
-        loop.run_until_complete(start_telegram_bot())
-    except RuntimeError as e:
-        if "set_wakeup_fd" in str(e):
-            print("⚠️  Bot polling warning (signal handlers skipped — this is OK in threads)")
-            # Игнорируем ошибку signal handler, продолжаем
-            try:
-                loop.run_until_complete(start_telegram_bot())
-            except Exception as e2:
-                print(f"❌ Bot thread error: {e2}")
-        else:
-            print(f"❌ Bot thread error: {e}")
-    except Exception as e:
-        print(f"❌ Bot thread error: {e}")
+        print(f"❌ Telegram Bot failed: {e}")
         import traceback
         traceback.print_exc()
 
@@ -114,29 +87,39 @@ def main():
     print("\n🚀 Launching services...")
     print("-" * 60)
     
-    # 1. Запускаем Telegram бота в отдельном потоке (если есть токен)
+    # 1. Запускаем FastAPI в отдельном потоке
+    print("🌐 Starting FastAPI server in background...")
+    fastapi_thread = threading.Thread(target=start_fastapi, daemon=True)
+    fastapi_thread.start()
+    
+    # 2. Запускаем Telegram бота в главном потоке (нужен для signal handlers)
     if START_BOT:
-        print("🤖 Starting Telegram Bot in background...")
-        bot_thread = threading.Thread(target=start_bot_thread, daemon=True)
-        bot_thread.start()
+        print("🤖 Starting Telegram Bot in main thread...")
+        print("-" * 60)
+        print("✅ All services started!")
+        print("=" * 60)
+        
+        try:
+            asyncio.run(start_telegram_bot())
+        except KeyboardInterrupt:
+            print("\n\n⏹️  Shutting down...")
+        except Exception as e:
+            print(f"\n❌ Telegram Bot failed: {e}")
+            import traceback
+            traceback.print_exc()
     else:
         print("⏭️  Skipping Telegram Bot")
-    
-    # 2. Запускаем FastAPI в главном потоке
-    print("🌐 Starting FastAPI server...")
-    print("-" * 60)
-    print("✅ All services started!")
-    print("=" * 60)
-    
-    try:
-        start_fastapi()
-    except KeyboardInterrupt:
-        print("\n\n⏹️  Shutting down...")
-    except Exception as e:
-        print(f"\n❌ FastAPI failed: {e}")
-        import traceback
-        traceback.print_exc()
-        sys.exit(1)
+        print("-" * 60)
+        print("✅ FastAPI started!")
+        print("=" * 60)
+        
+        try:
+            # Просто ждём
+            import time
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            print("\n\n⏹️  Shutting down...")
 
 if __name__ == "__main__":
     main()
