@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
 Главный startup скрипт для Railway
-Запускает:
-  1. Telegram бота (главный поток — нужен для signal handlers)
-  2. FastAPI сервер (отдельный поток)
+Запускает ВСЁ:
+  1. Детекторы + мониторинг Binance (главный поток)
+  2. Telegram бот (внутри скринера)
+  3. FastAPI сервер (отдельный поток)
 """
 
 import os
@@ -50,35 +51,32 @@ def start_fastapi():
         access_log=False,
     )
 
-# ── Запуск Telegram бота в главном потоке ────────────────────
-async def start_telegram_bot():
-    """Запускаем aiogram бота в главном потоке"""
-    if not START_BOT:
-        print("⏭️  Skipping Telegram bot (no token)")
-        return
-    
+# ── Запуск полного скринера (детекторы + бот) ────────────────
+async def start_full_screener():
+    """Запускаем полный скринер с детекторами"""
     try:
-        from bot.telegram_bot import WhaleAlertBot
+        from main import WhaleScreener
         
-        bot_token = TELEGRAM_BOT_TOKEN
-        admin_id = int(TELEGRAM_ADMIN_ID)
+        print("🔧 Initializing Whale Screener...")
+        screener = WhaleScreener()
+        await screener.initialize()
         
-        print(f"🤖 Starting Telegram Bot...")
-        print(f"   Admin ID: {admin_id}")
+        print("🚀 Starting full screener (detectors + bot + monitoring)...")
+        print("=" * 60)
+        print("✅ All services started!")
+        print("=" * 60)
         
-        # Создаём и инициализируем бота
-        bot = WhaleAlertBot(token=bot_token, admin_id=admin_id)
-        await bot.initialize()
-        
-        print("✅ Telegram Bot is running!")
-        
-        # Запускаем polling в главном потоке (signal handlers работают)
-        await bot.dispatcher.start_polling(bot.bot)
+        # Запускаем скринер (он сам запустит бота и мониторинг)
+        await screener.start()
         
     except Exception as e:
-        print(f"❌ Telegram Bot failed: {e}")
+        print(f"❌ Screener failed: {e}")
         import traceback
         traceback.print_exc()
+        # Если скринер упал, просто ждём
+        import time
+        while True:
+            time.sleep(60)
 
 # ── Main ─────────────────────────────────────────────────────
 def main():
@@ -92,29 +90,32 @@ def main():
     fastapi_thread = threading.Thread(target=start_fastapi, daemon=True)
     fastapi_thread.start()
     
-    # 2. Запускаем Telegram бота в главном потоке (нужен для signal handlers)
+    # 2. Запускаем полный скринер в главном потоке
     if START_BOT:
-        print("🤖 Starting Telegram Bot in main thread...")
+        print("🤖 Starting Full Screener (detectors + bot + monitoring)...")
         print("-" * 60)
-        print("✅ All services started!")
-        print("=" * 60)
         
         try:
-            asyncio.run(start_telegram_bot())
+            asyncio.run(start_full_screener())
         except KeyboardInterrupt:
             print("\n\n⏹️  Shutting down...")
         except Exception as e:
-            print(f"\n❌ Telegram Bot failed: {e}")
+            print(f"\n❌ Screener failed: {e}")
             import traceback
             traceback.print_exc()
+            
+            # Даже если скринер упал, FastAPI продолжает работать
+            print("⚠️  FastAPI still running, but detectors stopped")
+            import time
+            while True:
+                time.sleep(60)
     else:
-        print("⏭️  Skipping Telegram Bot")
+        print("⏭️  Skipping Screener (no bot token)")
         print("-" * 60)
-        print("✅ FastAPI started!")
+        print("✅ FastAPI running (web only)")
         print("=" * 60)
         
         try:
-            # Просто ждём
             import time
             while True:
                 time.sleep(1)
