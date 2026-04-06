@@ -757,7 +757,7 @@ class WhaleAlertBot:
             return
         
         text = f"👥 <b>Подписчики ({len(self._subscribers)}):</b>\n\n"
-        for user_id in self._subscribers:
+        for user_id in list(self._subscribers):  # Копия чтобы избежать RuntimeError
             if user_id == self.admin_id:
                 text += f"• {user_id} (админ) ✅\n"
             else:
@@ -1110,7 +1110,7 @@ class WhaleAlertBot:
         failed_count = 0
         skipped_count = 0
         
-        for user_id in self._subscribers:
+        for user_id in list(self._subscribers):  # Копия чтобы избежать RuntimeError
             try:
                 settings = self.get_user_settings(user_id)
                 
