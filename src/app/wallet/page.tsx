@@ -207,11 +207,11 @@ export default function WalletPage() {
         <Paper className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 border border-blue-500/30 rounded-xl p-4">
           <Text className="text-gray-400 text-xs mb-1">Общий баланс</Text>
           <Text className="text-3xl font-bold text-white mb-2">
-            ${totalUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${(totalUsd || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </Text>
           <div className="flex items-center gap-2">
             <Badge color="blue" size="sm">Futures</Badge>
-            <Badge color="green" size="sm">{balances.length} активов</Badge>
+            <Badge color="green" size="sm">{(balances || []).length} активов</Badge>
           </div>
         </Paper>
 
@@ -278,17 +278,17 @@ export default function WalletPage() {
                       <div>
                         <Text fw={600}>{balance.asset}</Text>
                         <Text className="text-xs text-gray-400 font-mono">
-                          {balance.total.toFixed(6)}
+                          {(balance.total || 0).toFixed(6)}
                         </Text>
                       </div>
                     </div>
                     <div className="text-right">
                       <Text fw={600}>
-                        ${balance.usd_value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        ${(balance.usd_value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </Text>
                       {balance.locked > 0 && (
                         <Badge color="yellow" size="xs" variant="outline">
-                          {balance.locked.toFixed(4)} locked
+                          {(balance.locked || 0).toFixed(4)} locked
                         </Badge>
                       )}
                     </div>
