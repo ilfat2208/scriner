@@ -115,20 +115,23 @@ if STATIC_DIR.exists():
         """
         Отдаём соответствующий HTML для SPA роутинга
         """
-        # Не перехватываем /api и /docs
+        # Не перехватываем API роуты (POST/PUT/DELETE тоже)
         if full_path.startswith("api/") or full_path.startswith("docs"):
-            return {"error": "Not found"}
+            return {"error": "API routes should be accessed directly"}
         
+        # Также не перехватываем POST/PUT/DELETE запросы к API
+        # (Это обрабатывается через метод запроса, не здесь)
+
         # Пробуем {path}/index.html (для /signals → signals/index.html)
         dir_index = STATIC_DIR / full_path / "index.html"
         if dir_index.exists():
             return FileResponse(dir_index)
-        
+
         # Пробуем {path}.html
         html_file = STATIC_DIR / f"{full_path}.html"
         if html_file.exists():
             return FileResponse(html_file)
-        
+
         # Fallback на корневой index.html
         return serve_index()
 else:
