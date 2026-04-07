@@ -167,7 +167,7 @@ export default function WalletPage() {
     return icons[asset] || '💰';
   };
 
-  if (loading && balances.length === 0) {
+  if (loading && (!balances || balances.length === 0)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -251,7 +251,7 @@ export default function WalletPage() {
             <Text className="text-base font-bold">Балансы</Text>
           </div>
           
-          {balances.length === 0 ? (
+          {(!balances || balances.length === 0) ? (
             <Paper className="bg-[#111827] border border-gray-800 rounded-lg p-6 text-center">
               <Text className="text-gray-400 mb-2">Нет балансов</Text>
               <Text className="text-xs text-gray-500 mb-4">
@@ -268,7 +268,7 @@ export default function WalletPage() {
             </Paper>
           ) : (
             <div className="space-y-2">
-              {balances.map((balance) => (
+              {(balances || []).map((balance) => (
                 <Paper
                   key={balance.asset}
                   className="bg-[#111827] border border-gray-800 rounded-lg p-3 active:scale-[0.98] transition-transform"
