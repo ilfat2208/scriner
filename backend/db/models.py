@@ -74,7 +74,7 @@ class TickerModel(Base):
 class WhaleThresholdModel(Base):
     """
     Модель порогов для детекции китов
-    
+
     Таблица: whale_thresholds
     """
     __tablename__ = "whale_thresholds"
@@ -87,3 +87,30 @@ class WhaleThresholdModel(Base):
 
     def __repr__(self):
         return f"<WhaleThreshold(pair={self.pair}, threshold=${self.min_volume_usd:,.2f})>"
+
+
+class UserModel(Base):
+    """
+    Модель пользователя Telegram
+
+    Таблица: users
+    """
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    telegram_id = Column(String(50), unique=True, nullable=False, index=True)
+    username = Column(String(100), nullable=True)
+    first_name = Column(String(100), nullable=True)
+    
+    # Binance API ключи (зашифрованные)
+    binance_api_key = Column(String(500), nullable=True)
+    binance_api_secret = Column(String(500), nullable=True)
+    binance_market_type = Column(String(20), default="FUTURES")  # SPOT или FUTURES
+    
+    # Настройки
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=func.now())
+
+    def __repr__(self):
+        return f"<User(telegram_id={self.telegram_id}, username={self.username})>"
