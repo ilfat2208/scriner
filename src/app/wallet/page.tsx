@@ -346,7 +346,6 @@ export default function WalletPage() {
             placeholder="Введите API Secret"
             value={apiSecret}
             onChange={(e) => setApiSecret(e.target.value)}
-            visibilityToggle
           />
           
           <div className="grid grid-cols-2 gap-2">
