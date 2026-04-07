@@ -53,18 +53,23 @@ export default function WalletPage() {
       setLoading(true);
       const response = await fetch('/api/wallet/balances', {
         headers: {
-          // Telegram User ID из window.Telegram.WebApp.initDataUnsafe.user?.id
-          'X-Telegram-User-ID': '1221745483', // Заменить на динамический
+          'X-Telegram-User-ID': '1221745483',
         },
       });
       
       if (response.ok) {
         const data = await response.json();
-        setBalances(data.balances);
-        setTotalUsd(data.total_usd);
+        setBalances(Array.isArray(data.balances) ? data.balances : []);
+        setTotalUsd(data.total_usd || 0);
+      } else {
+        // Если API недоступен, показываем пустой массив
+        setBalances([]);
+        setTotalUsd(0);
       }
     } catch (error) {
       console.error('Failed to fetch balances:', error);
+      setBalances([]);
+      setTotalUsd(0);
     } finally {
       setLoading(false);
     }
